@@ -1,11 +1,13 @@
 """
 ====================================================
 URSUS Configuration Manager
-Simple Web Interface to Configure Stripe Keys
+Simple Web Interface to Configure Everything Online
+Auto-configures Nginx, SSL, and Services
 ====================================================
 """
 
 import os
+import subprocess
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
@@ -15,6 +17,90 @@ ENV_FILE = "/home/ursus/ursus/.env"
 # For local development
 if not os.path.exists(ENV_FILE):
     ENV_FILE = ".env"
+
+def run_command(cmd):
+    """Run shell command safely"""
+    try:
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=300)
+        return result.returncode == 0, result.stdout, result.stderr
+    except Exception as e:
+        return False, "", str(e)
+
+def update_nginx_config(domain):
+    """Update Nginx configuration with the domain"""
+    nginx_config = f"""server {{
+    listen 80;
+    listen [::]:80;
+    server_name {domain};
+
+    location /.well-known/acme-challenge/ {{
+        root /var/www/html;
+    }}
+
+    location / {{
+        proxy_pass http://127.0.0.1:4242;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }}
+
+    location /health {{
+        proxy_pass http://127.0.0.1:4242;
+        proxy_buffering off;
+        access_log off;
+    }}
+
+    location /webhook {{
+        proxy_pass http://127.0.0.1:4242;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 1M;
+    }}
+}}"""
+    
+    try:
+        # Write nginx config
+        with open("/tmp/ursus_nginx.conf", "w") as f:
+            f.write(nginx_config)
+        
+        # Copy to nginx sites-available
+        os.system("sudo cp /tmp/ursus_nginx.conf /etc/nginx/sites-available/ursus")
+        os.system("sudo ln -sf /etc/nginx/sites-available/ursus /etc/nginx/sites-enabled/ursus")
+        os.system("sudo rm -f /etc/nginx/sites-enabled/default")
+        
+        # Test nginx config
+        success, _, _ = run_command("sudo nginx -t")
+        if success:
+            # Reload nginx
+            os.system("sudo systemctl reload nginx")
+            return True, "Nginx configured successfully"
+        else:
+            return False, "Nginx configuration failed"
+    except Exception as e:
+        return False, str(e)
+
+def get_ssl_certificate(domain, email):
+    """Get SSL certificate using Certbot"""
+    try:
+        cmd = f"sudo certbot --nginx -d {domain} --non-interactive --agree-tos --email {email} 2>&1"
+        success, output, error = run_command(cmd)
+        
+        if "already exists" in output or "already exists" in error or success:
+            return True, "SSL certificate ready"
+        else:
+            return False, "SSL certificate failed"
+    except Exception as e:
+        return False, str(e)
+
+def restart_services():
+    """Restart URSUS and related services"""
+    try:
+        os.system("sudo systemctl restart ursus")
+        os.system("sudo systemctl restart ursus-config")
+        return True, "Services restarted"
+    except Exception as e:
+        return False, str(e)
 
 @app.route("/", methods=["GET"])
 def index():
@@ -113,9 +199,35 @@ def save_config():
             f.write(f"PLATFORM_NAME={env_content['PLATFORM_NAME']}\n")
             f.write(f"CONNECTED_NAME={env_content['CONNECTED_NAME']}\n")
         
+        # Auto-configure everything!
+        messages = ["✓ Configuration saved successfully!"]
+        
+        # Update Nginx
+        success, msg = update_nginx_config(domain)
+        if success:
+            messages.append("✓ Nginx configured")
+        else:
+            messages.append(f"⚠ Nginx config: {msg}")
+        
+        # Get SSL certificate
+        success, msg = get_ssl_certificate(domain, email)
+        if success:
+            messages.append("✓ SSL certificate ready")
+        else:
+            messages.append(f"⚠ SSL certificate: {msg}")
+        
+        # Restart services
+        success, msg = restart_services()
+        if success:
+            messages.append("✓ Services restarted")
+        else:
+            messages.append(f"⚠ Services: {msg}")
+        
+        messages.append("✓ Your URSUS is LIVE!")
+        
         return jsonify({
             "success": True,
-            "message": "Configuration saved successfully! ✓"
+            "message": "\n".join(messages)
         }), 200
         
     except Exception as e:
