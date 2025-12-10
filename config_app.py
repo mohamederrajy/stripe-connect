@@ -27,15 +27,33 @@ def run_command(cmd):
         return False, "", str(e)
 
 def update_nginx_config(domain):
-    """Update Nginx configuration with the domain"""
-    nginx_config = f"""server {{
+    """Update Nginx configuration with the domain and SSL"""
+    api_domain = f"api.{domain}"
+    cert_path = f"/etc/letsencrypt/live/{domain}"
+    
+    nginx_config = f"""# HTTP to HTTPS redirect
+server {{
     listen 80;
     listen [::]:80;
-    server_name {domain};
+    server_name {domain} {api_domain};
 
     location /.well-known/acme-challenge/ {{
         root /var/www/html;
     }}
+
+    location / {{
+        return 301 https://$host$request_uri;
+    }}
+}}
+
+# HTTPS for stripec.dev (Main URSUS)
+server {{
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name {domain};
+
+    ssl_certificate {cert_path}/fullchain.pem;
+    ssl_certificate_key {cert_path}/privkey.pem;
 
     location / {{
         proxy_pass http://127.0.0.1:4242;
@@ -56,6 +74,32 @@ def update_nginx_config(domain):
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         client_max_body_size 1M;
+    }}
+
+    location /config {{
+        proxy_pass http://127.0.0.1:5000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }}
+}}
+
+# HTTPS for api.stripec.dev (Config API)
+server {{
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name {api_domain};
+
+    ssl_certificate {cert_path}/fullchain.pem;
+    ssl_certificate_key {cert_path}/privkey.pem;
+
+    location / {{
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }}
 }}"""
     
@@ -81,13 +125,15 @@ def update_nginx_config(domain):
         return False, str(e)
 
 def get_ssl_certificate(domain, email):
-    """Get SSL certificate using Certbot"""
+    """Get SSL certificate using Certbot for both domain and api subdomain"""
     try:
-        cmd = f"sudo certbot --nginx -d {domain} --non-interactive --agree-tos --email {email} 2>&1"
+        # Create certificate for both stripec.dev and api.stripec.dev
+        api_domain = f"api.{domain}"
+        cmd = f"sudo certbot certonly --standalone -d {domain} -d {api_domain} --non-interactive --agree-tos --email {email} 2>&1"
         success, output, error = run_command(cmd)
         
         if "already exists" in output or "already exists" in error or success:
-            return True, "SSL certificate ready"
+            return True, "SSL certificate ready for both domains"
         else:
             return False, "SSL certificate failed"
     except Exception as e:
