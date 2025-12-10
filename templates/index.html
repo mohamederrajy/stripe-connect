@@ -23,18 +23,20 @@
 
         .container {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
-            max-width: 800px;
+            box-shadow: 0 0 0;
             width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            padding: 40px;
+            padding: 30px 40px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -55,25 +57,31 @@
         }
 
         .content {
-            padding: 40px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: start;
+            gap: 0;
+            flex: 1;
+            overflow: hidden;
         }
 
         .section-card {
-            background: #fafafa;
-            border-radius: 12px;
-            padding: 30px;
-            border: 1px solid #f0f0f0;
+            background: white;
+            padding: 40px;
+            border-right: 2px solid #f0f0f0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .section-card:last-child {
+            border-right: none;
+            border-left: 2px solid #f0f0f0;
         }
 
         .section-card h2 {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: #2a5298;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -307,11 +315,12 @@
 
         footer {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 24px;
-            border-top: 1px solid #f0f0f0;
+            padding: 20px;
             color: #999;
-            font-size: 12px;
+            font-size: 11px;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
 
         footer a {
@@ -325,30 +334,38 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 900px) {
+        @media (max-width: 1200px) {
             .content {
                 grid-template-columns: 1fr;
-                gap: 24px;
             }
 
             .section-card {
-                padding: 24px;
+                border-right: none;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .section-card:last-child {
+                border-left: none;
+                border-bottom: none;
             }
         }
 
         @media (max-width: 600px) {
-            .container {
-                border-radius: 12px;
-            }
-
-            .content {
+            .header {
                 padding: 20px;
-                gap: 20px;
             }
 
-            button {
-                padding: 12px 20px;
-                font-size: 14px;
+            .logo {
+                font-size: 40px;
+                margin-bottom: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 12px;
             }
 
             .section-card {
@@ -356,7 +373,17 @@
             }
 
             .section-card h2 {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+
+            button {
+                padding: 12px 18px;
                 font-size: 14px;
+            }
+
+            .button-group {
+                gap: 10px;
             }
         }
     </style>
