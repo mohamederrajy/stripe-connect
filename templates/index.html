@@ -13,357 +13,440 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0f1419;
+            background: #0f172a;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
+            padding: 20px;
         }
 
         .container {
-            background: #1a1f26;
-            box-shadow: 0 0 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #0f1419 0%, #1a1f26 100%);
-            color: white;
-            padding: 20px 40px;
             text-align: center;
-            flex-shrink: 0;
-            border-bottom: 1px solid #2a3142;
+            margin-bottom: 30px;
         }
 
-        .logo {
-            font-size: 44px;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 26px;
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f8fafc;
             margin-bottom: 5px;
-            font-weight: 700;
-            color: #5ba3ff;
         }
 
-        .subtitle {
+        .header p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+
+        .stripe-logo {
+            transition: transform 0.3s ease;
+        }
+
+        .stripe-logo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 12px;
-            opacity: 0.8;
-            margin-bottom: 0;
-            color: #a8b0bf;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            flex: 1;
-            overflow: hidden;
-            padding: 16px;
-            background: #0f1419;
-        }
+        .badge.success { background: #dcfce7; color: #166534; }
+        .badge.error { background: #fee2e2; color: #991b1b; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.info { background: #dbeafe; color: #1e40af; }
 
-        .section-card {
-            background: #232a38;
-            padding: 24px;
-            border-radius: 10px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            border: 1px solid #2a3142;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .section-card h2 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #5ba3ff;
+        /* Cards */
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
             margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .form-group {
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            text-align: center;
+            border-top: 3px solid #667eea;
+            border: 1px solid #334155;
+        }
+
+        .stat-card.green { border-top-color: #10b981; }
+        .stat-card.red { border-top-color: #ef4444; }
+        .stat-card.blue { border-top-color: #3b82f6; }
+        .stat-card.orange { border-top-color: #f59e0b; }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
         }
 
         label {
             display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #a8b0bf;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
         }
 
-        .label-info {
-            font-size: 10px;
-            color: #7a8696;
-            font-weight: 400;
-            text-transform: none;
-            letter-spacing: 0;
-            margin-top: 4px;
-            display: block;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
+        input, select {
             width: 100%;
-            padding: 11px 13px;
-            border: 1px solid #3a4556;
-            border-radius: 7px;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-            background-color: #1a2537;
-            color: #e1e8f0;
+            padding: 10px 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #0f172a;
+            color: #f8fafc;
         }
 
-        input[type="text"]::placeholder,
-        input[type="email"]::placeholder,
-        input[type="password"]::placeholder {
-            color: #5a6578;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus {
+        input:focus, select:focus {
             outline: none;
-            border-color: #5ba3ff;
-            background-color: #1a2537;
-            box-shadow: 0 0 0 3px rgba(91, 163, 255, 0.1);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            background: #1e293b;
         }
 
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
+        small {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: block;
+            margin-top: 4px;
         }
 
-        button {
-            flex: 1;
-            padding: 12px 24px;
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 0.875rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
         }
 
-        .btn-save {
-            background: linear-gradient(135deg, #5ba3ff 0%, #3b82ff 100%);
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #667eea;
             color: white;
-            box-shadow: 0 4px 12px rgba(91, 163, 255, 0.3);
         }
 
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(91, 163, 255, 0.4);
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
         }
 
-        .btn-save:active {
-            transform: translateY(-1px);
+        .btn-secondary {
+            background: #334155;
+            color: #cbd5e1;
+            border: 1px solid #475569;
         }
 
-        .btn-clear {
-            background: #3a4556;
-            color: #e1e8f0;
-            border: 1px solid #4a5568;
+        .btn-secondary:hover:not(:disabled) {
+            background: #475569;
         }
 
-        .btn-clear:hover {
-            background: #454f64;
-            border-color: #5a6578;
-        }
-
+        /* Alerts */
         .alert {
-            padding: 12px 14px;
-            border-radius: 7px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            display: none;
-            border-radius: 7px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid;
         }
 
         .alert.success {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #6ee7b7;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            display: block;
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border-color: #22c55e;
         }
 
         .alert.error {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #ff9999;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            display: block;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: #ef4444;
+        }
+
+        .alert.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border-color: #f59e0b;
         }
 
         .alert.info {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #93c5fd;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            display: block;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-color: #3b82f6;
         }
 
-        .form-section-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #5ba3ff;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-top: 20px;
-            margin-bottom: 14px;
-            padding-top: 16px;
-            padding-bottom: 10px;
-            border-top: 1px solid #2a3142;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .form-section-title:first-of-type {
-            margin-top: 0;
-            border-top: none;
-            padding-top: 0;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 16px;
-            color: #5ba3ff;
-        }
-
-        .spinner {
-            border: 2px solid rgba(91, 163, 255, 0.2);
-            border-top: 2px solid #5ba3ff;
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 8px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            font-size: 12px;
-            color: #5ba3ff;
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.6s linear infinite;
         }
 
-        .transfer-item {
-            background-color: rgba(91, 163, 255, 0.05);
-            padding: 12px;
-            border-radius: 7px;
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-content {
+            animation: fadeSlide 0.5s ease-out;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
             margin-bottom: 10px;
-            border: 1px solid #2a3142;
-            font-size: 12px;
         }
 
-        .transfer-item:last-child {
-            margin-bottom: 0;
+        .empty-text {
+            font-size: 0.875rem;
+        }
+
+        /* Transfer Item */
+        .transfer-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.875rem;
+            border-left: 3px solid;
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .transfer-item.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+        }
+
+        .transfer-item.pending {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .transfer-item.failed {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
         }
 
         .transfer-amount {
-            color: #6ee7b7;
             font-weight: 700;
-            font-size: 11px;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-top: 8px;
         }
 
         .transfer-date {
-            color: #7a8696;
-            font-size: 11px;
-            margin-top: 4px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 6px;
         }
 
         .transfer-status {
             display: inline-block;
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-top: 6px;
+            margin-top: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            color: #a5b4fc;
         }
 
-        .status-success {
-            background-color: rgba(16, 185, 129, 0.2);
+        .transfer-status.success {
+            background: rgba(16, 185, 129, 0.2);
             color: #6ee7b7;
         }
 
-        .status-pending {
-            background-color: rgba(244, 114, 35, 0.2);
-            color: #fb923c;
+        .transfer-status.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
         }
 
-        .status-failed {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #ff9999;
+        .transfer-status.failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
         }
 
-        .empty-transfers {
-            text-align: center;
-            padding: 20px;
-            color: #7a8696;
-            font-size: 12px;
+        /* Results */
+        .results {
+            max-height: 450px;
+            overflow-y: auto;
+            margin-top: 15px;
         }
 
-        @media (max-width: 1024px) {
-            .content {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
+        .results::-webkit-scrollbar {
+            width: 6px;
+        }
 
-            .section-card {
-                max-height: 400px;
-            }
+        .results::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        .results::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .result-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.875rem;
+            border-left: 3px solid;
+        }
+
+        .result-item.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+        }
+
+        .result-item.failed {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .customer-name {
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 2px;
+        }
+
+        .customer-email {
+            font-size: 0.75rem;
+            color: #94a3b8;
         }
 
         @media (max-width: 768px) {
-            .container {
-                height: auto;
-                min-height: 100vh;
+            .layout {
+                grid-template-columns: 1fr;
             }
 
-            .header {
-                padding: 16px 24px;
+            .form-grid {
+                grid-template-columns: 1fr;
             }
 
-            .logo {
-                font-size: 36px;
-                margin-bottom: 8px;
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
 
-            h1 {
-                font-size: 22px;
-            }
-
-            .subtitle {
-                font-size: 11px;
-            }
-
-            .content {
-                padding: 12px;
-                gap: 12px;
-            }
-
-            .section-card {
-                padding: 20px;
-                max-height: none;
+            .header h1 {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -371,88 +454,95 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">⚡</div>
-            <h1>URSUS Gateway</h1>
-            <p class="subtitle">Stripe Connect Configuration & Transfers</p>
+            <h1>⚡ URSUS Gateway</h1>
+            <p>Stripe Connect Configuration & Transfers</p>
         </div>
 
-        <div class="content">
+        <div class="layout">
             <!-- Configuration Section (Left) -->
-            <div class="section-card">
-                <h2>⚙️ Configuration</h2>
+            <div class="card">
+                <div class="card-title">⚙️ Configuration</div>
 
-                <div id="alert" class="alert"></div>
+                <div id="alert" class="alert" style="display: none;"></div>
 
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Saving...</div>
+                <div class="loading" style="display: none; text-align: center; padding: 20px;">
+                    <div class="loading-spinner"></div>
+                    <div style="color: #94a3b8; margin-top: 10px;">Saving...</div>
                 </div>
 
-                <form id="configForm">
+                <form id="configForm" class="form-content">
                     <!-- Domain and Email -->
                     <div class="form-group">
                         <label for="domain">Domain Name</label>
                         <input type="text" id="domain" name="domain" placeholder="pay.yourdomain.com" required>
-                        <span class="label-info">The domain where URSUS will be accessible</span>
+                        <small>The domain where URSUS will be accessible</small>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" placeholder="admin@example.com" required>
-                        <span class="label-info">For SSL certificate and notifications</span>
+                        <small>For SSL certificate and notifications</small>
                     </div>
 
                     <!-- Stripe Keys Section -->
-                    <div class="form-section-title">🔑 Stripe Configuration</div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '20px', marginBottom: '15px', paddingTop: '15px', borderTop: '1px solid #334155' }}>
+                        🔑 Stripe Configuration
+                    </div>
 
                     <div class="form-group">
                         <label for="stripe_secret_key">Secret Key</label>
                         <input type="password" id="stripe_secret_key" name="stripe_secret_key" placeholder="sk_live_..." required>
-                        <span class="label-info">From Stripe Dashboard (starts with sk_live_ or sk_test_)</span>
+                        <small>From Stripe Dashboard (starts with sk_live_ or sk_test_)</small>
                     </div>
 
                     <div class="form-group">
                         <label for="connected_account_id">Connected Account ID</label>
                         <input type="text" id="connected_account_id" name="connected_account_id" placeholder="acct_..." required>
-                        <span class="label-info">Vendor/Merchant account (starts with acct_)</span>
+                        <small>Vendor/Merchant account (starts with acct_)</small>
                     </div>
 
                     <div class="form-group">
                         <label for="webhook_secret">Webhook Secret</label>
                         <input type="password" id="webhook_secret" name="webhook_secret" placeholder="whsec_..." required>
-                        <span class="label-info">From Webhooks in Stripe Dashboard</span>
+                        <small>From Webhooks in Stripe Dashboard</small>
                     </div>
 
                     <!-- Optional Settings -->
-                    <div class="form-section-title">📋 Optional Settings</div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '20px', marginBottom: '15px', paddingTop: '15px', borderTop: '1px solid #334155' }}>
+                        📋 Optional Settings
+                    </div>
 
                     <div class="form-group">
                         <label for="platform_name">Platform Name</label>
                         <input type="text" id="platform_name" name="platform_name" placeholder="My Platform">
-                        <span class="label-info">Your company name</span>
+                        <small>Your company name</small>
                     </div>
 
                     <div class="form-group">
                         <label for="connected_name">Connected Account Name</label>
                         <input type="text" id="connected_name" name="connected_name" placeholder="My Vendor">
-                        <span class="label-info">Vendor/Merchant name</span>
+                        <small>Vendor/Merchant name</small>
                     </div>
 
-                    <div class="button-group">
-                        <button type="submit" class="btn-save">Save Configuration</button>
-                        <button type="reset" class="btn-clear">Clear</button>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <button type="submit" class="btn btn-primary" style={{ flex: 1 }}>
+                            💾 Save Configuration
+                        </button>
+                        <button type="reset" class="btn btn-secondary" style={{ flex: 1 }}>
+                            ↺ Clear
+                        </button>
                     </div>
                 </form>
             </div>
 
             <!-- Transfers Section (Right) -->
-            <div class="section-card">
-                <h2>💳 Recent Transfers</h2>
+            <div class="card">
+                <div class="card-title">💳 Recent Transfers</div>
 
                 <div id="transfersList">
-                    <div class="empty-transfers">
-                        <p>No transfers yet</p>
-                        <p style="margin-top: 8px; font-size: 11px;">Transfers will appear here once processed</p>
+                    <div class="empty">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-text">No transfers yet</div>
                     </div>
                 </div>
             </div>
@@ -493,20 +583,20 @@
 
                     if (!data.transfers || data.transfers.length === 0) {
                         transfersList.innerHTML = `
-                            <div class="empty-transfers">
-                                <p>No transfers yet</p>
-                                <p style="margin-top: 8px; font-size: 11px;">Transfers will appear here once processed</p>
+                            <div class="empty">
+                                <div class="empty-icon">📭</div>
+                                <div class="empty-text">No transfers yet</div>
                             </div>
                         `;
                     } else {
                         transfersList.innerHTML = data.transfers.map(t => `
-                            <div class="transfer-item">
-                                <div style="color: #e1e8f0; font-weight: 600;">
+                            <div class="transfer-item ${t.status}">
+                                <div style="color: #f8fafc; font-weight: 600;">
                                     ${t.description || 'Transfer'}
                                 </div>
                                 <div class="transfer-amount">${t.amount}</div>
                                 <div class="transfer-date">${new Date(t.date).toLocaleString()}</div>
-                                <span class="transfer-status status-${t.status}">${t.status}</span>
+                                <span class="transfer-status ${t.status}">${t.status}</span>
                             </div>
                         `).join('');
                     }
@@ -520,8 +610,9 @@
         function showAlert(message, type = 'success') {
             alertDiv.textContent = message;
             alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'flex';
             setTimeout(() => {
-                alertDiv.className = 'alert';
+                alertDiv.style.display = 'none';
             }, 5000);
         }
 
