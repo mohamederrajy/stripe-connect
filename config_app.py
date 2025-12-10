@@ -36,13 +36,24 @@ def save_config():
     try:
         data = request.get_json()
         
+        # Server Configuration
+        domain = data.get("domain", "").strip()
+        email = data.get("email", "").strip()
+        
+        # Stripe Configuration
         stripe_key = data.get("stripe_secret_key", "").strip()
         account_id = data.get("connected_account_id", "").strip()
         webhook_secret = data.get("webhook_secret", "").strip()
+        
+        # Business Names
         platform_name = data.get("platform_name", "My Platform").strip()
         connected_name = data.get("connected_name", "My Vendor").strip()
         
         # Validation
+        if not domain:
+            return jsonify({"error": "Domain is required"}), 400
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
         if not stripe_key:
             return jsonify({"error": "Stripe Secret Key is required"}), 400
         if not account_id:
@@ -51,6 +62,8 @@ def save_config():
             return jsonify({"error": "Webhook Secret is required"}), 400
         
         # Validate format
+        if "@" not in email or "." not in email:
+            return jsonify({"error": "Email format is invalid"}), 400
         if not stripe_key.startswith("sk_"):
             return jsonify({"error": "Stripe Secret Key must start with 'sk_'"}), 400
         if not account_id.startswith("acct_"):
@@ -69,6 +82,8 @@ def save_config():
                         env_content[key.strip()] = value.strip()
         
         # Update values
+        env_content["DOMAIN"] = domain
+        env_content["EMAIL"] = email
         env_content["STRIPE_SECRET_KEY"] = stripe_key
         env_content["CONNECTED_ACCOUNT_ID"] = account_id
         env_content["STRIPE_WEBHOOK_SECRET"] = webhook_secret
@@ -82,7 +97,10 @@ def save_config():
         
         # Write .env file
         with open(ENV_FILE, "w") as f:
-            f.write("# Stripe Configuration\n")
+            f.write("# Server Configuration\n")
+            f.write(f"DOMAIN={env_content['DOMAIN']}\n")
+            f.write(f"EMAIL={env_content['EMAIL']}\n")
+            f.write(f"\n# Stripe Configuration\n")
             f.write(f"STRIPE_SECRET_KEY={env_content['STRIPE_SECRET_KEY']}\n")
             f.write(f"STRIPE_WEBHOOK_SECRET={env_content['STRIPE_WEBHOOK_SECRET']}\n")
             f.write(f"CONNECTED_ACCOUNT_ID={env_content['CONNECTED_ACCOUNT_ID']}\n")
@@ -91,7 +109,7 @@ def save_config():
             f.write(f"\n# Application\n")
             f.write(f"FLASK_ENV={env_content['FLASK_ENV']}\n")
             f.write(f"PORT={env_content['PORT']}\n")
-            f.write(f"\n# Optional\n")
+            f.write(f"\n# Business Names\n")
             f.write(f"PLATFORM_NAME={env_content['PLATFORM_NAME']}\n")
             f.write(f"CONNECTED_NAME={env_content['CONNECTED_NAME']}\n")
         

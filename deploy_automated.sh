@@ -23,13 +23,33 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Get domain from environment or use default
-DOMAIN=${URSUS_DOMAIN:-"ursus.example.com"}
-EMAIL=${URSUS_EMAIL:-"admin@example.com"}
+# No hardcoded domain/email - user will enter via dashboard!
+# Create placeholder .env
+cat > /tmp/initial_env << 'EOF'
+# Server Configuration (will be set via dashboard)
+DOMAIN=change-me.com
+EMAIL=admin@change-me.com
 
-echo -e "${YELLOW}Automated Configuration:${NC}"
-echo "  Domain: $DOMAIN"
-echo "  Email: $EMAIL"
+# Stripe Configuration (will be set via dashboard)
+STRIPE_SECRET_KEY=placeholder
+STRIPE_WEBHOOK_SECRET=placeholder
+CONNECTED_ACCOUNT_ID=placeholder
+
+# Security
+URSUS_API_KEY=auto-generated
+
+# Application
+FLASK_ENV=production
+PORT=4242
+
+# Business Names
+PLATFORM_NAME=My Platform
+CONNECTED_NAME=My Vendor
+EOF
+
+echo -e "${YELLOW}Configuration:${NC}"
+echo "  All settings will be configured via web dashboard!"
+echo "  Domain, Email, and Stripe keys → Dashboard at http://[server]:5000"
 echo ""
 
 # ====================================================
@@ -95,18 +115,36 @@ echo -e "${GREEN}✓ Python environment ready${NC}"
 echo -e "${BLUE}⚙️ Configuring environment...${NC}"
 
 if [ ! -f "/home/ursus/ursus/.env" ]; then
-    # Create .env from example
-    cp /home/ursus/ursus/env.example /home/ursus/ursus/.env
-    
-    # Generate API key
+    # Create .env with placeholders
     API_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
-    sed -i "s/URSUS_API_KEY=.*/URSUS_API_KEY=$API_KEY/" /home/ursus/ursus/.env
+    
+    cat > /home/ursus/ursus/.env << ENVEOF
+# Server Configuration (set via dashboard)
+DOMAIN=example.com
+EMAIL=admin@example.com
+
+# Stripe Configuration (set via dashboard)
+STRIPE_SECRET_KEY=placeholder
+STRIPE_WEBHOOK_SECRET=placeholder
+CONNECTED_ACCOUNT_ID=placeholder
+
+# Security
+URSUS_API_KEY=$API_KEY
+
+# Application
+FLASK_ENV=production
+PORT=4242
+
+# Business Names
+PLATFORM_NAME=My Platform
+CONNECTED_NAME=My Vendor
+ENVEOF
     
     chown ursus:ursus /home/ursus/ursus/.env
     chmod 600 /home/ursus/ursus/.env
     
-    echo -e "${GREEN}✓ Created .env file (placeholders only)${NC}"
-    echo -e "${YELLOW}⚠  You'll configure Stripe keys in the web dashboard!${NC}"
+    echo -e "${GREEN}✓ Created .env with placeholders${NC}"
+    echo -e "${YELLOW}⚠  Configure everything in the web dashboard!${NC}"
 else
     echo -e "${YELLOW}⚠  .env already exists${NC}"
 fi
@@ -303,12 +341,16 @@ echo ""
 echo -e "${YELLOW}⚠️  NEXT STEP:${NC}"
 echo ""
 echo "1. Open in your browser:"
-echo "   http://5.161.116.77:5000"
+echo "   http://[your-server-ip]:5000"
 echo ""
-echo "2. Enter your 3 Stripe keys:"
+echo "2. Enter ALL configuration:"
+echo "   • Domain Name (e.g., pay.yourdomain.com)"
+echo "   • Email Address (e.g., admin@example.com)"
 echo "   • STRIPE_SECRET_KEY (sk_live_...)"
 echo "   • CONNECTED_ACCOUNT_ID (acct_...)"
 echo "   • STRIPE_WEBHOOK_SECRET (whsec_...)"
+echo "   • Platform Name (optional)"
+echo "   • Vendor Name (optional)"
 echo ""
 echo "3. Click: Save Configuration"
 echo ""

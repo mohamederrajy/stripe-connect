@@ -238,6 +238,38 @@
         <div id="alert" class="alert"></div>
 
         <form id="configForm">
+            <div class="section-title">🌐 Server Configuration</div>
+
+            <div class="form-group">
+                <label>
+                    Domain Name
+                    <div class="label-info">Your domain (e.g., pay.yourdomain.com)</div>
+                </label>
+                <input 
+                    type="text" 
+                    id="domain" 
+                    name="domain"
+                    placeholder="pay.yourdomain.com" 
+                    value="{{ config.domain }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Email Address
+                    <div class="label-info">For SSL certificate and notifications</div>
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email"
+                    placeholder="your.email@example.com" 
+                    value="{{ config.email }}"
+                    required
+                >
+            </div>
+
             <div class="section-title">🔑 Required Stripe Keys</div>
 
             <div class="form-group">
@@ -335,6 +367,8 @@
             e.preventDefault();
 
             const formData = {
+                domain: document.getElementById('domain').value,
+                email: document.getElementById('email').value,
                 stripe_secret_key: document.getElementById('stripe_secret_key').value,
                 connected_account_id: document.getElementById('connected_account_id').value,
                 webhook_secret: document.getElementById('webhook_secret').value,
