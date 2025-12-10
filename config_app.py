@@ -54,9 +54,19 @@ server {{
 
     ssl_certificate {cert_path}/fullchain.pem;
     ssl_certificate_key {cert_path}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {{
         proxy_pass http://127.0.0.1:4242;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }}
+
+    location /config {{
+        proxy_pass http://127.0.0.1:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -75,14 +85,6 @@ server {{
         proxy_set_header X-Real-IP $remote_addr;
         client_max_body_size 1M;
     }}
-
-    location /config {{
-        proxy_pass http://127.0.0.1:5000/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }}
 }}
 
 # HTTPS for api.stripec.dev (Config API)
@@ -93,6 +95,8 @@ server {{
 
     ssl_certificate {cert_path}/fullchain.pem;
     ssl_certificate_key {cert_path}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {{
         proxy_pass http://127.0.0.1:5000;
