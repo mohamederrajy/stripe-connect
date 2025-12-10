@@ -554,8 +554,9 @@
         const alertDiv = document.getElementById('alert');
         const loadingDiv = document.querySelector('.loading');
         
-        // Backend API endpoint
-        const API_URL = 'https://api.stripec.dev';
+        // Backend API endpoint - use current protocol and domain
+        // This works with both http://stripec.dev and https://stripec.dev
+        const API_URL = window.location.protocol + '//' + window.location.hostname;
 
         // Load transfers (placeholder - future integration)
         async function loadTransfers() {
