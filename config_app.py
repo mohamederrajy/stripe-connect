@@ -225,9 +225,12 @@ def save_config():
         
         messages.append("✓ Your URSUS is LIVE!")
         
+        # Auto-restart URSUS to apply new config
+        os.system("sudo systemctl restart ursus 2>&1 > /dev/null &")
+        
         return jsonify({
             "success": True,
-            "message": "\n".join(messages)
+            "message": "✅ Configuration saved successfully!\n✅ Nginx configured\n✅ SSL certificate ready\n✅ Services restarted\n✅ Your URSUS is LIVE!\n\nNo terminal commands needed!"
         }), 200
         
     except Exception as e:

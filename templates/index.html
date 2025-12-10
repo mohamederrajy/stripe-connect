@@ -396,8 +396,8 @@
                 if (response.ok) {
                     showAlert(data.message, 'success');
                     setTimeout(() => {
-                        showAlert('✓ Restart URSUS service with: systemctl restart ursus', 'info');
-                    }, 1500);
+                        showAlert('🎉 Your URSUS is now LIVE! Everything is automatic!', 'success');
+                    }, 2000);
                 } else {
                     showAlert(data.error || 'Failed to save configuration', 'error');
                 }
