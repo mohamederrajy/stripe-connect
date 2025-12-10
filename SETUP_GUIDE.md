@@ -37,7 +37,7 @@ You need **3 things from Stripe** to make URSUS work:
 5. Copy the **Secret Key** (⚠️ NOT the Publishable Key!)
 6. It should start with `sk_live_` or `sk_test_`
 
-**Example:** `sk_live_51P5a5Bx7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x`
+**Format:** `sk_live_[your-secret-key-here]`
 
 ---
 

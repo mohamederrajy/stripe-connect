@@ -11,7 +11,7 @@
 │ 1. STRIPE SECRET KEY (sk_live_...)                                          │
 │    └─ Go to: Stripe Dashboard → Developers → API Keys                       │
 │    └─ Copy: Secret Key (NOT Publishable Key!)                               │
-│    └─ Example: sk_live_51P5a5Bx7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x         │
+│    └─ Format: sk_live_[your-key-here]                                       │
 │    └─ For: API authentication with your Platform Account                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 2. CONNECTED ACCOUNT ID (acct_...)                                          │
