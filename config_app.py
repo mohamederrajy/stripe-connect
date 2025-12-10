@@ -129,13 +129,29 @@ def get_ssl_certificate(domain, email):
     try:
         # Create certificate for both stripec.dev and api.stripec.dev
         api_domain = f"api.{domain}"
-        cmd = f"sudo certbot certonly --standalone -d {domain} -d {api_domain} --non-interactive --agree-tos --email {email} 2>&1"
+        
+        # First, remove old certificate if it exists (only for old single domain cert)
+        os.system(f"sudo rm -rf /etc/letsencrypt/live/{domain} 2>/dev/null")
+        os.system(f"sudo rm -rf /etc/letsencrypt/archive/{domain} 2>/dev/null")
+        
+        # Use webroot mode which works with Nginx running
+        # This creates a certificate with both domains in SANs (Subject Alternative Names)
+        cmd = f"sudo certbot certonly --webroot -w /var/www/html -d {domain} -d {api_domain} --non-interactive --agree-tos --email {email} --force-renewal 2>&1"
         success, output, error = run_command(cmd)
         
-        if "already exists" in output or "already exists" in error or success:
+        if success or "already exists" in output or "already exists" in error:
             return True, "SSL certificate ready for both domains"
         else:
-            return False, "SSL certificate failed"
+            # If webroot fails, try standalone (stop nginx temporarily)
+            os.system("sudo systemctl stop nginx 2>/dev/null")
+            cmd2 = f"sudo certbot certonly --standalone -d {domain} -d {api_domain} --non-interactive --agree-tos --email {email} --force-renewal 2>&1"
+            success, output, error = run_command(cmd2)
+            os.system("sudo systemctl start nginx 2>/dev/null")
+            
+            if success or "already exists" in output or "already exists" in error:
+                return True, "SSL certificate ready for both domains"
+            else:
+                return False, f"SSL certificate failed: {error}"
     except Exception as e:
         return False, str(e)
 
