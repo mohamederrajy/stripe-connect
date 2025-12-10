@@ -554,56 +554,15 @@
         const alertDiv = document.getElementById('alert');
         const loadingDiv = document.querySelector('.loading');
 
-        // Load saved configuration
-        async function loadConfig() {
-            try {
-                const response = await fetch('/api/config');
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('domain').value = data.domain || '';
-                    document.getElementById('email').value = data.email || '';
-                    document.getElementById('stripe_secret_key').value = data.stripe_secret_key || '';
-                    document.getElementById('connected_account_id').value = data.connected_account_id || '';
-                    document.getElementById('webhook_secret').value = data.webhook_secret || '';
-                    document.getElementById('platform_name').value = data.platform_name || '';
-                    document.getElementById('connected_name').value = data.connected_name || '';
-                }
-            } catch (error) {
-                console.error('Error loading config:', error);
-            }
-        }
-
-        // Load transfers
+        // Load transfers (placeholder - future integration)
         async function loadTransfers() {
-            try {
-                const response = await fetch('/api/transfers');
-                if (response.ok) {
-                    const data = await response.json();
-                    const transfersList = document.getElementById('transfersList');
-
-                    if (!data.transfers || data.transfers.length === 0) {
-                        transfersList.innerHTML = `
-                            <div class="empty">
-                                <div class="empty-icon">📭</div>
-                                <div class="empty-text">No transfers yet</div>
-                            </div>
-                        `;
-                    } else {
-                        transfersList.innerHTML = data.transfers.map(t => `
-                            <div class="transfer-item ${t.status}">
-                                <div style="color: #f8fafc; font-weight: 600;">
-                                    ${t.description || 'Transfer'}
-                                </div>
-                                <div class="transfer-amount">${t.amount}</div>
-                                <div class="transfer-date">${new Date(t.date).toLocaleString()}</div>
-                                <span class="transfer-status ${t.status}">${t.status}</span>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading transfers:', error);
-            }
+            const transfersList = document.getElementById('transfersList');
+            transfersList.innerHTML = `
+                <div class="empty">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-text">No transfers yet. Save configuration to enable transfer tracking.</div>
+                </div>
+            `;
         }
 
         // Show alert
@@ -625,7 +584,7 @@
 
             try {
                 const formData = new FormData(configForm);
-                const response = await fetch('/api/config', {
+                const response = await fetch('/save-config', {
                     method: 'POST',
                     body: JSON.stringify(Object.fromEntries(formData)),
                     headers: {
@@ -638,7 +597,7 @@
                 loadingDiv.style.display = 'none';
 
                 if (response.ok) {
-                    showAlert('✓ Configuration saved successfully!', 'success');
+                    showAlert(result.message || '✓ Configuration saved successfully!', 'success');
                     setTimeout(() => loadTransfers(), 1000);
                 } else {
                     showAlert(result.error || 'Error saving configuration', 'error');
@@ -650,7 +609,6 @@
         });
 
         // Load data on page load
-        loadConfig();
         loadTransfers();
 
         // Refresh transfers every 30 seconds
