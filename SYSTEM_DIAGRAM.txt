@@ -1,0 +1,386 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      URSUS COMPLETE SYSTEM DIAGRAM                         ║
+║                    Stripe Connect Payment Gateway v2.0                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+PART 1: CONFIGURATION PHASE
+════════════════════════════════════════════════════════════════════════════
+
+       YOU HAVE 3 STRIPE KEYS
+              │
+              │  sk_live_...
+              │  acct_...
+              │  whsec_...
+              ↓
+       ┌─────────────────┐
+       │  Configuration  │
+       │      App        │
+       │                 │
+       │ Port 5000       │
+       │ (Web Browser)   │
+       └────────┬────────┘
+                │
+                │  Form submission
+                │  Validation ✓
+                ↓
+       ┌─────────────────────────────┐
+       │     config_app.py           │
+       │                             │
+       │  • Validate sk_ prefix      │
+       │  • Validate acct_ prefix    │
+       │  • Validate whsec_ prefix   │
+       │  • Read existing .env       │
+       │  • Update with new values   │
+       │  • Save to disk             │
+       └────────┬────────────────────┘
+                │
+                ↓
+       ┌─────────────────────────────┐
+       │     .env File               │
+       │  /home/ursus/ursus/.env    │
+       │                             │
+       │ STRIPE_SECRET_KEY=...       │
+       │ STRIPE_WEBHOOK_SECRET=...   │
+       │ CONNECTED_ACCOUNT_ID=...    │
+       │ URSUS_API_KEY=...           │
+       │ PLATFORM_NAME=...           │
+       │ CONNECTED_NAME=...          │
+       └─────────────────────────────┘
+
+PART 2: RUNTIME PHASE
+════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         INTERNET / CUSTOMERS                             │
+└──────────────────┬───────────────────────────────┬───────────────────────┘
+                   │                               │
+                   │ POST /create-payment-intent   │ POST /webhook
+                   │ (Customer payment)            │ (Stripe event)
+                   │                               │
+                   ↓                               ↓
+        ┌──────────────────────────┐   ┌──────────────────────────┐
+        │  Nginx Reverse Proxy     │   │  Nginx Reverse Proxy     │
+        │  (HTTPS - Port 443)      │   │  (HTTPS - Port 443)      │
+        │                          │   │                          │
+        │ • SSL/TLS Encryption     │   │ • SSL/TLS Encryption     │
+        │ • Reverse Proxy          │   │ • Reverse Proxy          │
+        │ • Rate Limiting          │   │ • Rate Limiting          │
+        └────────┬─────────────────┘   └──────────┬───────────────┘
+                 │                                │
+                 └────────────┬────────────────────┘
+                              │
+                              ↓
+                ┌──────────────────────────────────┐
+                │      Gunicorn WSGI Server        │
+                │  (Port 4242 - localhost only)    │
+                │                                  │
+                │  • 4 Worker Processes            │
+                │  • 2 Threads per Worker          │
+                │  • 30 second timeout             │
+                │  • Max 1000 requests per worker  │
+                └──────────┬───────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ↓                         ↓
+    ┌──────────────────────┐  ┌──────────────────────┐
+    │      app.py          │  │   config_app.py      │
+    │   (Main Gateway)     │  │ (Configuration UI)   │
+    │   Port 4242          │  │   Port 5000          │
+    └────────┬─────────────┘  └──────────────────────┘
+             │
+    ┌────────┴──────────┬──────────────┬──────────────┐
+    │                   │              │              │
+    ↓                   ↓              ↓              ↓
+ Load .env    Create     Process      Handle       Health
+ Read keys    Payment    Webhooks     Refunds      Check
+ Initialize  Intents    Transfers    Logging
+             (Flask)
+
+
+PART 3: PAYMENT FLOW
+════════════════════════════════════════════════════════════════════════════
+
+CUSTOMER FLOW:
+
+    👤 Customer
+        │
+        │ Pays with card
+        │
+        ↓
+    ┌─────────────────────────────────────────────────────┐
+    │         YOUR URSUS APPLICATION                      │
+    │  POST /create-payment-intent (Authenticated)        │
+    │         Amount: $100                                │
+    └──────────────┬──────────────────────────────────────┘
+                   │
+                   │ Requests from Stripe API
+                   │ (using STRIPE_SECRET_KEY)
+                   ↓
+    ┌──────────────────────────────────────────────────────────┐
+    │              STRIPE PLATFORM ACCOUNT                     │
+    │  (Your Account - Merchant of Record)                     │
+    │                                                          │
+    │  Creates PaymentIntent                                  │
+    │  Receives payment: $100                                 │
+    │  Publishes webhook event: charge.succeeded             │
+    └──────────┬───────────────────────────────────────────────┘
+               │
+               │ Webhook event (HTTPS)
+               │ Signature: whsec_...
+               │
+               ↓
+    ┌──────────────────────────────────────────────────────┐
+    │         YOUR URSUS APPLICATION                       │
+    │  POST /webhook (Stripe Webhook Handler)              │
+    │                                                      │
+    │  1. Verify signature (whsec_...)           ✓        │
+    │  2. Extract charge ID & amount             ✓        │
+    │  3. Calculate fees:                        ✓        │
+    │     - Stripe: 2.9% + $0.30 = $3.20                 │
+    │     - Platform: 1% of net = $0.97                  │
+    │     - Vendor: remainder = $95.83                   │
+    │  4. Check idempotency (already transferred?) ✓     │
+    │  5. Create transfer to vendor               ✓      │
+    └────────────────┬─────────────────────────────────┘
+                     │
+                     │ Transfer request from Stripe API
+                     │ (using STRIPE_SECRET_KEY)
+                     │ Amount: $95.83
+                     │ Destination: CONNECTED_ACCOUNT_ID
+                     ↓
+    ┌──────────────────────────────────────────────────────┐
+    │           STRIPE CONNECTED ACCOUNT                   │
+    │  (Vendor's Stripe Account)                           │
+    │                                                      │
+    │  Receives transfer: $95.83                           │
+    │  Transaction logged                                 │
+    └──────────────────────────────────────────────────────┘
+
+MONEY BREAKDOWN:
+
+    $100.00 (Customer Payment)
+        │
+        ├─ $3.20 (Stripe Fee: 2.9% + $0.30) → Stripe
+        │
+        ├─ $0.97 (Platform Commission: 1%) → You/Platform
+        │
+        └─ $95.83 (Vendor Share) → Connected Account ✓
+
+RESULT: Automatic, no manual transfers! ✅
+
+
+PART 4: SYSTEM MONITORING
+════════════════════════════════════════════════════════════════════════════
+
+Systemd Service (ursus.service)
+    │
+    ├─ Type: notify
+    ├─ User: ursus
+    ├─ WorkingDirectory: /home/ursus/ursus
+    ├─ ExecStart: gunicorn ...
+    ├─ Restart: always
+    ├─ RestartSec: 10
+    │
+    └─ Monitoring:
+        │
+        ├─ Health Check Endpoint
+        │  └─ GET /health
+        │     └─ Returns: {"status": "healthy", "stripe_connected": true}
+        │
+        ├─ Log Rotation (/etc/logrotate.d/ursus)
+        │  └─ Daily rotation, 14-day retention, compression
+        │
+        ├─ Fail2Ban Security (/etc/fail2ban/jail.local)
+        │  └─ Ban IPs after 5 failed auth attempts for 1 hour
+        │
+        ├─ Cron Monitoring (Every 5 minutes)
+        │  └─ Check: Health, Disk Usage, Memory Usage
+        │     └─ Auto-restart if failed
+        │
+        └─ Logging
+           ├─ /var/log/ursus/access.log (HTTP requests)
+           ├─ /var/log/ursus/error.log (Errors)
+           └─ /var/log/ursus/monitor.log (Health checks)
+
+
+PART 5: SECURITY LAYERS
+════════════════════════════════════════════════════════════════════════════
+
+    REQUEST INCOMING
+        │
+        └─→ Layer 1: Firewall (UFW)
+            └─ Allow: 22 (SSH), 80 (HTTP), 443 (HTTPS)
+               Block: Everything else
+                │
+                └─→ Layer 2: Nginx (Reverse Proxy)
+                    └─ SSL/TLS Encryption
+                       Rate Limiting (global)
+                       Security Headers
+                        │
+                        └─→ Layer 3: Gunicorn (WSGI)
+                            └─ Process isolation
+                               Worker limits
+                               Timeout protection
+                                │
+                                └─→ Layer 4: Application (app.py)
+                                    │
+                                    ├─ API Endpoints:
+                                    │  └─ Require X-API-Key header
+                                    │     Rate limit: 10/min
+                                    │
+                                    ├─ Webhooks:
+                                    │  └─ Verify Stripe signature (whsec_...)
+                                    │     Rate limit: 1000/hr
+                                    │
+                                    ├─ Input Validation:
+                                    │  └─ Amount range check
+                                    │     Email format validation
+                                    │     String sanitization
+                                    │
+                                    ├─ Idempotency:
+                                    │  └─ Track processed charges
+                                    │     Prevent duplicate transfers
+                                    │
+                                    └─ Error Handling:
+                                       └─ No stack traces in responses
+                                          Secure error messages
+                                          Suspicious activity logging
+                                            │
+                                            └─→ Layer 5: Fail2Ban
+                                                └─ Monitor error logs
+                                                   Ban after 5 attempts
+                                                   1 hour ban time
+
+
+PART 6: FILES & DIRECTORIES
+════════════════════════════════════════════════════════════════════════════
+
+On Your Local Machine:
+    /Users/aziz/Documents/ursus/
+    ├── 📄 Documentation (8 files)
+    │   ├── START_HERE.md
+    │   ├── README.md
+    │   ├── SETUP_GUIDE.md
+    │   ├── QUICK_REFERENCE.txt
+    │   ├── ARCHITECTURE.md
+    │   ├── DEPLOYMENT_CHECKLIST.md
+    │   ├── CONFIG_README.md
+    │   └── FILE_INDEX.md
+    │
+    ├── 🐍 Code
+    │   ├── app.py (582 lines)
+    │   ├── config_app.py (150 lines)
+    │   └── requirements.txt
+    │
+    ├── 🎨 Frontend
+    │   └── templates/index.html (250 lines)
+    │
+    └── 🚀 Deployment
+        ├── deploy.sh
+        ├── fix_deployment.sh
+        ├── run_config.sh
+        └── env.example
+
+On Your VPS Server (After deployment):
+    /home/ursus/ursus/
+    ├── app.py
+    ├── config_app.py
+    ├── .env (Your secure configuration)
+    ├── venv/ (Python virtual environment)
+    ├── requirements.txt
+    └── templates/
+        └── index.html
+
+    /var/log/ursus/
+    ├── access.log (HTTP requests)
+    ├── error.log (Application errors)
+    └── monitor.log (Health checks)
+
+    /etc/
+    ├── systemd/system/ursus.service
+    ├── nginx/sites-available/ursus
+    ├── nginx/sites-enabled/ursus (symlink)
+    ├── logrotate.d/ursus
+    ├── fail2ban/jail.local
+    └── fail2ban/filter.d/ursus-auth.conf
+
+
+PART 7: DATA FLOW SUMMARY
+════════════════════════════════════════════════════════════════════════════
+
+                        Configuration Phase
+                        ════════════════════
+    
+    Browser (http://localhost:5000)
+        │
+        │ Form with 3 keys
+        │ (Beautiful UI)
+        ↓
+    config_app.py
+        │
+        │ Validate format
+        │ Validate content
+        │ Read .env
+        │ Update values
+        ↓
+    .env File
+    (Persistent)
+
+
+                        Runtime Phase
+                        ═════════════
+    
+    Stripe Platform Account
+        │
+        │ Receives payment
+        │ Creates charge
+        │ Publishes webhook
+        ↓
+    URSUS Application
+        │
+        │ Verify webhook signature
+        │ Calculate fees
+        │ Check idempotency
+        │ Create transfer
+        ↓
+    Stripe Connected Account
+        │
+        │ Receives transfer
+        │ Settles to vendor
+        ↓
+    Vendor Bank Account
+    (Vendor receives money)
+
+
+════════════════════════════════════════════════════════════════════════════════
+
+QUICK REFERENCE:
+
+Configuration:
+  • Browser: http://localhost:5000
+  • Backend: config_app.py (Flask, port 5000)
+  • Storage: .env file (/home/ursus/ursus/.env)
+
+Runtime:
+  • Frontend: Web browser or API client
+  • Backend: app.py (Flask, port 4242 via Gunicorn)
+  • Reverse Proxy: Nginx (HTTPS, port 443)
+
+Security:
+  • API Auth: X-API-Key header
+  • Webhook Auth: Stripe signature (whsec_...)
+  • Encryption: HTTPS/TLS
+  • Rate Limiting: 10/min (payments), 1000/hr (webhooks)
+  • Monitoring: Systemd, Fail2Ban, Cron health checks
+
+Monitoring:
+  • Health: GET /health
+  • Logs: journalctl -u ursus -f
+  • Status: systemctl status ursus
+
+════════════════════════════════════════════════════════════════════════════════
+
+Made with ❤️ for seamless Stripe Connect integration.
+URSUS v2.0 | Production Ready ✓
+

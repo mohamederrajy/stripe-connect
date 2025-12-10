@@ -1,0 +1,129 @@
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                    URSUS QUICK REFERENCE CARD                               ║
+║              Stripe Connect Gateway Configuration Guide                      ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 THE 3 THINGS YOU NEED FROM STRIPE:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. STRIPE SECRET KEY (sk_live_...)                                          │
+│    └─ Go to: Stripe Dashboard → Developers → API Keys                       │
+│    └─ Copy: Secret Key (NOT Publishable Key!)                               │
+│    └─ Example: sk_live_51P5a5Bx7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x7x         │
+│    └─ For: API authentication with your Platform Account                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 2. CONNECTED ACCOUNT ID (acct_...)                                          │
+│    └─ Go to: Stripe Dashboard → Connected Accounts                          │
+│    └─ Copy: Your vendor's Account ID                                        │
+│    └─ Example: acct_1K4mZ5Ax7x7x7x7x7                                       │
+│    └─ For: Sending vendor's share of payments                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 3. WEBHOOK SECRET (whsec_...)                                               │
+│    └─ Go to: Stripe Dashboard → Developers → Webhooks                       │
+│    └─ Add endpoint: https://your-domain.com/webhook                         │
+│    └─ Select events: charge.succeeded, charge.captured, charge.refunded     │
+│    └─ Copy: Signing secret                                                  │
+│    └─ Example: whsec_test_abcdef1234567890                                  │
+│    └─ For: Verifying webhook authenticity                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ HOW TO CONFIGURE:
+
+Option A (EASIEST - Web Interface):
+────────────────────────────────────
+$ python3 config_app.py
+→ Open: http://localhost:5000
+→ Paste 3 keys
+→ Click: Save Configuration
+→ Done! ✓
+
+
+Option B (Manual - Edit .env):
+───────────────────────────────
+$ nano /home/ursus/ursus/.env
+
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+CONNECTED_ACCOUNT_ID=acct_...
+
+Save: Ctrl + X → Y → Enter
+
+
+After either option:
+────────────────────
+$ systemctl restart ursus
+$ systemctl status ursus
+$ curl https://your-domain.com/health
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 HOW THE MONEY FLOWS:
+
+Customer Payment ($100)
+        ↓
+Stripe Fee (-2.9% - $0.30) = -$3.20
+        ↓
+Net after Stripe = $96.80
+        ↓
+Platform Commission (-1%) = -$0.97
+        ↓
+Vendor Share = $95.83 ✓
+
+(Platform keeps $0.97 + Stripe fee of $3.20)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🐛 TROUBLESHOOTING COMMANDS:
+
+Check if URSUS is running:
+$ systemctl status ursus
+
+View live logs:
+$ journalctl -u ursus -f
+
+View error log:
+$ tail -f /var/log/ursus/error.log
+
+Restart service:
+$ systemctl restart ursus
+
+Test health endpoint:
+$ curl https://your-domain.com/health
+
+Check configuration:
+$ cat /home/ursus/ursus/.env
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 SUPPORT:
+
+DeskCodes Business Contact:
+├─ Phone: +1 206-408-6213
+├─ Email: contact@deskcodes.com
+├─ Address: 182-21 150th Avenue, Springfield Gardens NY 11413
+└─ Hours: Mon-Fri: 9AM-6PM EST
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ READY CHECKLIST:
+
+□ Have Stripe Platform Account
+□ Have Connected Account (vendor)
+□ Copied sk_live_... key
+□ Copied acct_... ID
+□ Created webhook with whsec_... secret
+□ Ran configuration app
+□ Restarted URSUS service
+□ Tested health endpoint
+□ Ready to accept payments! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Version: URSUS 2.0
+Environment: Production Ready
+Last Updated: December 2025
+

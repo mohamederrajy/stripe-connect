@@ -1,0 +1,51 @@
+# ====================================================
+# URSUS - Production Dependencies
+# ====================================================
+
+# Web Framework
+Flask==3.0.3
+Werkzeug==3.0.3
+
+# Stripe SDK
+stripe==10.12.0
+
+# Environment Management
+python-dotenv==1.0.1
+
+# Rate Limiting
+Flask-Limiter==3.8.0
+limits==3.13.0
+
+# Production WSGI Server
+gunicorn==22.0.0
+
+# ====================================================
+# Optional: Production Enhancements
+# ====================================================
+
+# Redis (for distributed rate limiting across multiple servers)
+# Uncomment if using Redis:
+# redis==5.0.8
+
+# Database (for transaction logging and audit trails)
+# Uncomment if using PostgreSQL:
+# psycopg2-binary==2.9.9
+# SQLAlchemy==2.0.32
+
+# Monitoring & Error Tracking
+# Uncomment if using Sentry:
+# sentry-sdk[flask]==2.14.0
+
+# Testing (development only)
+# Uncomment for running test suite:
+# colorama==0.4.6
+# requests==2.31.0
+# pytest==8.3.3
+# pytest-flask==1.3.0
+
+# ====================================================
+# Security Note
+# ====================================================
+# Keep dependencies updated regularly:
+# pip list --outdated
+# pip install --upgrade stripe Flask gunicorn
