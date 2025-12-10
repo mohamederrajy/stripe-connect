@@ -1,0 +1,81 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                      🚀 DEPLOY NOW - JUST 3 STEPS 🚀                       ║
+║                                                                            ║
+║                    One-Command Deployment to Your Server                  ║
+║                        (5.161.116.77)                                     ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✨ STEP 1: Connect to Server
+════════════════════════════════════════════════════════════════════════════
+
+$ ssh root@5.161.116.77
+
+(Enter your server password)
+
+
+✨ STEP 2: Run This One Command
+════════════════════════════════════════════════════════════════════════════
+
+Copy and paste this entire line:
+
+cd /tmp && git clone https://github.com/mohamederrajy/stripe-connect.git && cd stripe-connect && chmod +x deploy_automated.sh && sudo bash deploy_automated.sh
+
+
+⏳ Wait 10-15 minutes while it:
+  ✓ Updates system
+  ✓ Installs dependencies  
+  ✓ Configures Nginx
+  ✓ Gets SSL certificate
+  ✓ Starts URSUS service
+
+✅ Look for this message:
+   "✓✓✓ URSUS is running!"
+
+
+✨ STEP 3: Configure Online
+════════════════════════════════════════════════════════════════════════════
+
+On your LAPTOP (not server), open your browser:
+
+  http://5.161.116.77:5000
+
+You'll see a beautiful purple form.
+
+Enter your 3 Stripe keys:
+  1. Stripe Secret Key (sk_live_...)
+  2. Connected Account ID (acct_...)  
+  3. Webhook Secret (whsec_...)
+
+Click: "Save Configuration"
+
+You'll see: "✓ Configuration saved successfully!"
+
+
+🎉 DONE! Your URSUS is LIVE!
+════════════════════════════════════════════════════════════════════════════
+
+Your gateway is now online at:
+  • Dashboard: http://5.161.116.77:5000
+  • API: https://your-domain.com/create-payment-intent
+  • Webhook: https://your-domain.com/webhook
+  • Health: https://your-domain.com/health
+
+Your URSUS will:
+  ✓ Accept customer payments
+  ✓ Calculate fees automatically
+  ✓ Transfer vendor shares
+  ✓ Run 24/7 (auto-restart)
+  ✓ Log everything
+
+════════════════════════════════════════════════════════════════════════════
+
+That's it! No terminals, no configuration files, no hassle!
+
+Everything is done online through the beautiful web dashboard.
+
+════════════════════════════════════════════════════════════════════════════
+
+Made with ❤️ | URSUS v2.0 | Ready to Deploy ✓
+
